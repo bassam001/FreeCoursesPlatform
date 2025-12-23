@@ -1,11 +1,17 @@
+﻿using FCP.Application;
 using FCP.Infrastructure;
-using FCP.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// CORS for Angular
+builder.Services.AddCors(o => o.AddPolicy("ng", p =>
+    p.AllowAnyHeader()
+     .AllowAnyMethod()
+     .WithOrigins("http://localhost:4200")));
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -18,5 +24,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseCors("ng");
+
+app.UseAuthorization();
+
 app.MapControllers();
+app.MapGet("/", () => "API is running ✅");
+
 app.Run();

@@ -2,10 +2,12 @@
 
 public class CourseItem
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid CourseId { get; set; }
-    public Course Course { get; set; } = default!;
-    public string Title { get; set; } = default!;
-    public string ExternalUrl { get; set; } = default!;
-    public int OrderIndex { get; set; }
+    public Course? Course { get; set; }
+    public string Title { get; set; } = "";
+    public string? ContentUrl { get; set; }
+    public string Type { get; set; } = "Video"; // Video/Text/Quiz
+    public int Order { get; set; }
+    public int? DurationMinutes { get; set; }
 }

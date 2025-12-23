@@ -1,5 +1,6 @@
 ﻿using FCP.Application.Common.Interfaces;
 using FCP.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,11 +11,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<ApplicationDbContext>(opt =>
+            opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
-        services.AddScoped<IApplicationDbContext>(provider =>
-            provider.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        services.AddIdentityCore<IdentityUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
         return services;
     }
