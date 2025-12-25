@@ -10,31 +10,43 @@ namespace FCP.Api.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    public CoursesController(ApplicationDbContext db) => _db = db;
 
-    public CoursesController(ApplicationDbContext db)
-    {
-        _db = db;
-    }
-
-    // GET: api/courses
+    // GET api/courses
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var courses = await _db.Courses
             .AsNoTracking()
-            .OrderByDescending(c => c.Id)
+            .Include(c => c.Provider)
+            .Select(c => new CourseResponse(
+                c.Id,
+                c.Title,
+                c.Description,
+                c.ProviderId,
+                c.Provider.Name
+            ))
             .ToListAsync(ct);
 
         return Ok(courses);
     }
 
-    // GET: api/courses/5
-    [HttpGet("{id:int}")]
+    // GET api/courses/{id}
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var course = await _db.Courses
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id, ct);
+            .Include(c => c.Provider)
+            .Where(c => c.Id == id)
+            .Select(c => new CourseResponse(
+                c.Id,
+                c.Title,
+                c.Description,
+                c.ProviderId,
+                c.Provider.Name
+            ))
+            .FirstOrDefaultAsync(ct);
 
         return course is null ? NotFound() : Ok(course);
     }
