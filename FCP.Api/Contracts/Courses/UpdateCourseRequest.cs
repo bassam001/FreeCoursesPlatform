@@ -3,5 +3,5 @@
 public record UpdateCourseRequest(
     string Title,
     string? Description,
-    int ProviderId
+    Guid ProviderId
 );

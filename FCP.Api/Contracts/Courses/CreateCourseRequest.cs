@@ -3,5 +3,5 @@
 public record CreateCourseRequest(
     string Title,
     string? Description,
-    int ProviderId
+    Guid ProviderId
 );
