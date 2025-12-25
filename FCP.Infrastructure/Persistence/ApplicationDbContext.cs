@@ -1,12 +1,13 @@
-﻿using FCP.Domain.Entities;
+﻿using FCP.Application.Common.Interfaces;
+using FCP.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FCP.Infrastructure.Persistence;
 
-public class Persistence : IdentityDbContext
+public class ApplicationDbContext : IdentityDbContext, IApplicationDbContext
 {
-    public Persistence(DbContextOptions<ApplicationDbContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
     public DbSet<Course> Courses => Set<Course>();
@@ -20,11 +21,12 @@ public class Persistence : IdentityDbContext
         builder.Entity<Course>()
             .HasOne(c => c.Provider)
             .WithMany(p => p.Courses)
-            .HasForeignKey(c => c.ProviderId);
+            .HasForeignKey(c => c.ProviderId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<CourseItem>()
-            .HasOne(ci => ci.Course)
+            .HasOne(i => i.Course)
             .WithMany(c => c.Items)
-            .HasForeignKey(ci => ci.CourseId);
+            .HasForeignKey(i => i.CourseId);
     }
 }

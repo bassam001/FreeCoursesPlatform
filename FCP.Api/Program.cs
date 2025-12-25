@@ -1,5 +1,5 @@
+﻿using FCP.Application;
 using FCP.Infrastructure;
-using FCP.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,5 +18,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting();
+app.UseCors("ng");
+app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();
