@@ -3,6 +3,7 @@
 public class Provider
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+
     public string Name { get; set; } = "";
     public string? Website { get; set; }
     public string? LogoUrl { get; set; }

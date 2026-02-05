@@ -1,7 +1,10 @@
-﻿namespace FCP.Api.Contracts.Courses;
+﻿using FCP.Domain.Enums;
+
+namespace FCP.Api.Contracts.Courses;
 
 public record CreateCourseRequest(
     string Title,
     string? Description,
-    Guid ProviderId
+    Guid ProviderId,
+    CourseLevel Level
 );

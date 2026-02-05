@@ -24,7 +24,7 @@ public class CoursesController : ControllerBase
                 c.Title,
                 c.Description,
                 c.ProviderId,
-                c.Provider.Name
+                c.Provider!.Name
             ))
             .ToListAsync(ct);
 
@@ -44,36 +44,48 @@ public class CoursesController : ControllerBase
                 c.Title,
                 c.Description,
                 c.ProviderId,
-                c.Provider.Name
+                c.Provider!.Name
             ))
             .FirstOrDefaultAsync(ct);
 
         return course is null ? NotFound() : Ok(course);
     }
 
-    // POST: api/courses
+    // POST api/courses
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCourseRequest request, CancellationToken ct)
     {
-        var providerExists = await _db.Providers.AnyAsync(p => p.Id == request.ProviderId, ct);
-        if (!providerExists)
+        var provider = await _db.Providers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == request.ProviderId, ct);
+
+        if (provider is null)
             return BadRequest($"ProviderId={request.ProviderId} does not exist.");
 
         var course = new FCP.Domain.Entities.Course
         {
             Title = request.Title,
-            Description = request.Description,
-            ProviderId = request.ProviderId
+            Description = request.Description ?? "",
+            ProviderId = request.ProviderId,
+            Level = request.Level
         };
 
         _db.Courses.Add(course);
         await _db.SaveChangesAsync(ct);
 
-        return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
+        var response = new CourseResponse(
+            course.Id,
+            course.Title,
+            course.Description,
+            course.ProviderId,
+            provider.Name
+        );
+
+        return CreatedAtAction(nameof(GetById), new { id = course.Id }, response);
     }
 
-    // PUT: api/courses/5
-    [HttpPut("{id:int}")]
+    // PUT api/courses/{id}
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCourseRequest request, CancellationToken ct)
     {
         var course = await _db.Courses.FirstOrDefaultAsync(c => c.Id == id, ct);
@@ -84,15 +96,17 @@ public class CoursesController : ControllerBase
             return BadRequest($"ProviderId={request.ProviderId} does not exist.");
 
         course.Title = request.Title;
-        course.Description = request.Description;
+        course.Description = request.Description ?? "";
         course.ProviderId = request.ProviderId;
+        course.Level = request.Level;
+        course.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
         return NoContent();
     }
 
-    // DELETE: api/courses/5
-    [HttpDelete("{id:int}")]
+    // DELETE api/courses/{id}
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var course = await _db.Courses.FirstOrDefaultAsync(c => c.Id == id, ct);
